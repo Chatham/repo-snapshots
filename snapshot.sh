@@ -42,7 +42,7 @@ fi
 [[ -z "${REPO_BASE}" ]] && REPO_BASE="${PWD}"
 # TODO sanity check on REPO_BASE in case run manually
 [[ -z "${SNAPSHOT_BASE}" ]] && SNAPSHOT_BASE=$(readlink -f $REPO_BASE/../snapshot)
-# do not use a leading or trailing slash in the name
+# slashes will be directories
 [[ -z "${SNAPSHOT_NAME}" ]] && SNAPSHOT_NAME="$(date +"%Y/%m/%d_%H%M")"
 # count depth. This helps speed up the finds alot
 # strip first and last characters, in case a slash was used, which will mess up the count
@@ -143,13 +143,13 @@ function snapshot_apt_repo() {
         if ! [[ -e "${snapshot_repo_base}" ]]; then
             # this is the first snapshot, do it
             vecho "first snapshot"
-            make_snapshot $src $dst
+            make_apt_snapshot $src $dst
         else
             # find the last snapshot
             local last_snapshot=$(find "${snapshot_repo_base}" -mindepth $DEPTH -maxdepth $DEPTH -print | sort -n | tail -n 1)
             if [[ -z "${last_snapshot}" ]]; then
                 vecho "last snapshot not found"
-                make_snapshot $src $dst
+                make_apt_snapshot $src $dst
             else
                 # see if the repo is different than last snapshot
                 vecho "compare ${src} to ${last_snapshot}"
@@ -158,7 +158,7 @@ function snapshot_apt_repo() {
                 local diff_changes_count=$(echo "${diff_changes}" | grep -c "/pool")
                 if [[ $diff_changes_count -gt 0 ]]; then
                     vecho "change"
-                    make_snapshot $src $dst "${diff_changes}"
+                    make_apt_snapshot $src $dst "${diff_changes}"
                 else
                     vecho "no change - snapshot will NOT be created"
                 fi
@@ -167,7 +167,7 @@ function snapshot_apt_repo() {
     fi
 }
 
-function make_snapshot() {
+function make_apt_snapshot() {
     local src=$1
     local dst=$2
 

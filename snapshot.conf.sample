@@ -1,0 +1,38 @@
+# The default values can be seen in the script itself.
+# These are examples on how to override the defaults.
+
+#
+# snapshot mode configuration
+#
+# SNAPSHOT_BASE is where the snapshots will be created. This should
+# really be on the same filesystem as the repositories being snapshotted
+SNAPSHOT_BASE=/var/spool/apt-mirror/snapshot
+# The format for the name of the created snapshot
+SNAPSHOT_NAME=$(date +"%s")
+
+
+#
+# serve mode configuration
+#
+# all created URLs will start with URL base
+# URL_BASE itself will map to the latest snapshot until FREEZE_URL_BASE is set
+URL_BASE="mirror"
+# the URL to browse all created snapshots
+URL_SNAPSHOT="s"
+
+# define various URLs
+# The first argument is the URL and the second argument must match the path of the snapshot
+# order can matter if the URLs overlap.  E.g. Apache will complain about overlapping Aliases if 2015 comes before 2015/01
+# If no path matches the argument, the URL will not be created
+#
+# In these examples
+# 2015-01-01 will map to the latest snapshot on January 1 2015
+# 2015/01 will map be latest snapshot in January 2015
+# 2015 will map to the latest snapshot in 2015, since it will match any date in 2015
+# tip will map to the latest snapshot, since it will match any date until 2100
+declare -a URLS=(
+2015-01-01 2015/01/01
+2015/01 2015/01
+2015 2015
+tip 20
+)

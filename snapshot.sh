@@ -199,15 +199,25 @@ function serve() {
 }
 
 function configure_web_server() {
-    configure_apache_24
+    local apache_conf_base="/etc/apache/conf.d"
+    local apache24_conf_base="/etc/apache/conf-available"
+
+    if [[ -d "${apache_conf_base}" ]]; then
+        # older packages of apache
+        # TODO support.  Needs different Allow/Deny config
+        #configure_apache "${apache_conf_base}"
+    elif [[ -d "${apache24_conf_base}" ]]; then
+        # newer packages of apache
+        configure_apache_24 "${apache24_conf_base}"
+    fi
 }
 
 function configure_apache_24() {
-    local conf_base=/etc/apache2/conf-available
+    local conf_base=$1
 
     # apache2 package needed
     if ! [[ -w ${conf_base} ]]; then
-        vecho "Apache not installed, not configuring"
+        vecho "Apache2.4 not installed, not configuring"
         return
     fi
 

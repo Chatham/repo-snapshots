@@ -39,7 +39,9 @@ fi
 
 # variables
 # postmirror script starts in the mirror directory
-[[ -z "${REPO_BASE}" ]] && REPO_BASE="${PWD}"
+#[[ -z "${REPO_BASE}" ]] && REPO_BASE="${PWD}"
+# use the apt-mirror HOME
+[[ -z "${REPO_BASE}" ]] && REPO_BASE="$( getent passwd "apt-mirror" | cut -d: -f6 )"
 # TODO sanity check on REPO_BASE in case run manually
 [[ -z "${SNAPSHOT_BASE}" ]] && SNAPSHOT_BASE=$(readlink -f $REPO_BASE/../snapshot)
 # slashes will be directories

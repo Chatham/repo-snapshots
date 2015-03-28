@@ -6,7 +6,7 @@
 
 It was difficult to provide consistent patch sets to servers.  It was also difficult to test patches in a lower environment before deploying them to production environments.  Researching how to solve these issues showed that using a local mirror with snapshots was a technique that would work.  No projects existed that provided tools to leverage this technique or describe how it could be used.
 
-Thsi project's original goals were to simply
+This project's original goals were to simply
 - provide a consistent patch set to servers
 - allow multiple patch sets to be presented, so lower environments can be used to test patches before deploying to higher environments
 - ability to access to older versions of packages, in case they needed to be rolled-back
@@ -20,6 +20,8 @@ Whenever the local mirror is updated, a snapshot copy is created using `cp -al`.
 As the local mirror updates over time, it will unlink the removed package versions.  The snapshot directory will retain the link, so the package version is still available.  Each snapshot directory will represent the state of the repository at the time the snapshot was taken.
 
 Since APT repositories are just a directory structure, it is easy to serve the local mirrors and snapshots over http.  For extra simplicity, URLs can be configured to be aliases to specific snapshot directories.  These are referred to as **named snapshots**.
+
+Each snapshot represents a patch set that can be deployed to servers.
 
 ## Quick Start Guide
 
@@ -80,12 +82,12 @@ There is no requirement to configure Apache or repo-snapshots.  For this example
 
 ### Perform an intial sync
 
-Warning: This will take a long time to run, and will use alot of disk space.
+**Warning:** This will take a long time to run, and will use alot of disk space.
 ```
 # /usr/local/src/repo-snapshots/apt-mirror-helper.sh
 ```
 
-### Configure cron job
+### Create a cron job
 
 Create a cron job to update the local repository.  A wrapper script is used so the Apache configuration can be done as root.
 
@@ -104,9 +106,8 @@ The local mirrors
 The local snapshots.  There is no link to this location in the parent directory because the URL is an alias.
 - http://localrepo/mirror/snapshots
 
-APT can be ocnfigured to point to the local mirror, or to a specific snapshot.
+APT can be ocnfigured to point to the local mirror, or to a specific snapshot.  For example, to use the local mirror
 
-For example, to use the local mirror
 `editor /etc/apt/sources.list`
 ```
 deb http://localrepo/mirror/archive.ubuntu.com/ubuntu trusty main
@@ -127,12 +128,12 @@ The configuration described is either manual or vague.  Using configuration mana
 
 The primary objective of the repo-snapshots setup is to allow consistent patch sets to be deployed.  These patch sets are represented by a repository snapshot.  Since many snapshots are available, different patch sets can be deployed to different sets of servers.
 
-For this example, 3 named patch sets will be created using familiar APT terms
+For this example, 3 named snapshots will be created using familiar APT terms
 - **unstable** will point to the latest snapshot
 - **testing** will point to a given day
-- **stable** will point to the previous testing snapshot
+- **stable** will point to the previous **testing** snapshot
 
-The testing snapshot will be used for **dev** servers.  The **stable** snapshot will be used for **prod** servers.
+The **testing** snapshot will be used for **dev** servers.  The **stable** snapshot will be used for **prod** servers.
 
 For simplicity, the servers will be patched on the first of each month, and a snapshot will always exist on that day.
 
@@ -174,7 +175,7 @@ When patching is done during this month
 
 #### Rolling forward
 
-For the next patch window, simply progress the named snapshots forward.  The prod snapshot will always be the previous dev snapshot.
+For the next patch window, simply progress the named snapshots forward.  The **stable** snapshot used for **prod** will always be the previous **testing** snapshot used for **dev**.
 
 `editor /usr/local/src/repo-snapshots/snapshot.conf`
 ```

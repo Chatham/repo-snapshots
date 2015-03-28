@@ -201,8 +201,8 @@ function serve() {
 }
 
 function configure_web_server() {
-    local apache_conf_base="/etc/apache/conf.d"
-    local apache24_conf_base="/etc/apache/conf-available"
+    local apache_conf_base="/etc/apache2/conf.d"
+    local apache24_conf_base="/etc/apache2/conf-available"
 
     if [[ -d "${apache_conf_base}" ]]; then
         # older packages of apache

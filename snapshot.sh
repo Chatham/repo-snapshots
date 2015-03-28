@@ -64,6 +64,8 @@ DEPTH=$((${#SLASHES} + 1))
 # poor man's enum
 snapshot_mode=0
 serve_mode=1
+apache22_mode=0
+apache24_mode=1
 
 # command line options
 verbose=0
@@ -205,19 +207,20 @@ function configure_web_server() {
     if [[ -d "${apache_conf_base}" ]]; then
         # older packages of apache
         # TODO support.  Needs different Allow/Deny config
-        #configure_apache "${apache_conf_base}"
+        configure_apache24 "${apache_conf_base}" $apache22_mode
     elif [[ -d "${apache24_conf_base}" ]]; then
         # newer packages of apache
-        configure_apache_24 "${apache24_conf_base}"
+        configure_apache24 "${apache24_conf_base}" $apache24_mode
     fi
 }
 
-function configure_apache_24() {
+function configure_apache24() {
     local conf_base=$1
+    local apache_mode=$2
 
     # apache2 package needed
     if ! [[ -w ${conf_base} ]]; then
-        vecho "Apache2.4 not installed, not configuring"
+        vecho "Apache not installed, not configuring"
         return
     fi
 
@@ -265,7 +268,10 @@ EOF
 Alias /${URL_BASE}/${URL_SNAPSHOT} ${SNAPSHOT_BASE}
 # browse all repos
 Alias /${URL_BASE} ${REPO_BASE}
+EOF
 
+        if [[ $apache_mode -eq $apache24_mode ]]; then
+            cat >>${conf_base}/${conf1}.conf << EOF
 # access
 <Directory ${SNAPSHOT_BASE}>
     Options +Indexes +MultiViews
@@ -276,7 +282,24 @@ Alias /${URL_BASE} ${REPO_BASE}
     Require all granted
 </Directory>
 EOF
-        a2enconf $conf1
+            a2enconf $conf1
+        else
+            cat >>${conf_base}/${conf1}.conf << EOF
+# access
+<Directory ${SNAPSHOT_BASE}>
+    Options +Indexes +MultiViews
+    Order allow,deny
+    Allow from all
+</Directory>
+<Directory ${REPO_BASE}>
+    Options +Indexes +MultiViews
+    Order allow,deny
+    Allow from all
+</Directory>
+EOF
+
+        fi
+
         service apache2 reload
     fi
 }

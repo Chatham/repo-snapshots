@@ -10,7 +10,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # set global vars
 SYSLOG_TAG=""
-LOG_FILE="/opt/chatham/log/apt-mirror-$(date +"%F_%H-%M-%S")"
+LOG_FILE=""
 LOCK_FILE=""
 RUN_AS="root"
 
